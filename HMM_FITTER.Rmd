@@ -1,0 +1,46 @@
+```{r}
+data <- fread(("~/my_data_norm.csv"))
+datadf <- as.data.frame(data)
+class(datadf)
+# Check for NA values in the data frame
+sum(is.na(datadf))  # Total number of NA values
+```
+```{r}
+# Create the response list for the HMM (each column is a response variable)
+response_list <- lapply(colnames(datadf), function(var) {
+  as.formula(paste(var, "~ 1"))
+})
+
+# Define the family list (using Gaussian distribution for each kmer proportion)
+family_list <- rep(list(gaussian()), length(colnames(datadf)))
+
+# Define the number of states for the HMM
+nstates <- 100  # You can adjust the number of states based on your data
+
+# Build the HMM model
+hmm_model <- depmix(response = response_list, 
+                    data = datadf, 
+                    nstates = nstates, 
+                    family = family_list)
+
+# Fit the model using Expectation-Maximization (EM)
+hmm_fit <- fit(hmm_model)
+
+# Check the fitted model summary
+summary(hmm_fit)
+```
+```{r}
+library(HiddenMarkov)
+# Convert to a matrix (since HiddenMarkov requires matrix input for continuous data)
+data_matrix <- as.matrix(datadf)
+
+# Define the number of states
+nstates <- 3
+
+# Fit the HMM using Baum-Welch
+hmm_model <- hmmFit(data_matrix, nStates = nstates)
+
+# Check the fitted model
+summary(hmm_model)
+```
+
