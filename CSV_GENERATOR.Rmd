@@ -15,7 +15,8 @@ library(readr)
 ```
 ```{r}
 #read in the fasta file
-chr21 <- read.fasta("chr21.fa", forceDNAtolower = FALSE, strip.desc = TRUE)
+chr21 <- read.fasta("chr21.fa", forceDNAtolower = TRUE, strip.desc = TRUE)
+head(chr21)
 ```
 ```{r}
 sliding_window <- function(sequence, window_size, step_size) {
@@ -39,7 +40,7 @@ kmer_count <- function(window, k) {
   for (i in 1:(nchar(window_str) - k + 1)) {
     kmer <- substr(window_str, i, i+k-1)
     
-    if (grepl("[a-zN]", kmer)) {
+    if (grepl("[N,n]", kmer)) {
       next
     }
     
@@ -103,7 +104,7 @@ kmerdf1_norm[is.na(kmerdf1_norm)] <- 0
 
 
 ```{r}
-fwrite(kmerdf1_norm, "~/my_data_norm.csv") 
+fwrite(kmerdf1_norm, "~/my_data_normnosoftmask.csv") 
 ```
 
 
