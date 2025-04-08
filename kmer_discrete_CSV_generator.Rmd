@@ -1,0 +1,50 @@
+---
+title: "kmer_3"
+author: "David Murphy"
+date: "2025-04-07"
+output: html_document
+---
+
+```{r}
+library(seqinr)
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(readr)
+
+chr21 <- read.fasta("chr21.fa", forceDNAtolower = TRUE, strip.desc = TRUE)
+
+```
+
+
+```{r}
+sliding_window <- function(sequence, window_size, step_size) {
+  windows <- list()
+  for (i in seq(1, length(sequence) - window_size + 1, by = step_size)) {
+    window <- sequence[i:(i + window_size - 1)]
+    windows[[length(windows) + 1]] <- window
+  }
+  return(windows)
+}
+
+windows <- sliding_window(chr21[[1]], 10000, 10000)
+
+```
+
+```{r}
+extract_dinucleotides <- function(window) {
+  dinucleotides <- character(0)
+  if (length(window) >= 2) {
+    for (i in 1:(length(window) - 1)) {
+      dinucleotide <- paste0(window[i], window[i + 1])
+      dinucleotides <- c(dinucleotides, dinucleotide)
+    }
+  }
+  return(dinucleotides)
+}
+
+# Apply the dinucleotide extraction function to each window
+window_dinucleotides_list <- lapply(windows, extract_dinucleotides)
+```
+
+
