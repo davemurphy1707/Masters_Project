@@ -1,0 +1,64 @@
+---
+title: "Kmer_counts_2mer"
+author: "David Murphy"
+date: "2025-04-28"
+output: html_document
+---
+
+```{r}
+library(seqinr)
+library(data.table)
+
+# Read FASTA
+chr21 <- read.fasta("chr21.fa", forceDNAtolower = TRUE, strip.desc = TRUE)
+
+# Sliding window function
+sliding_window <- function(sequence, window_size, step_size) {
+  windows <- list()
+  for (i in seq(1, length(sequence) - window_size + 1, by = step_size)) {
+    window <- sequence[i:(i + window_size - 1)]
+    windows[[length(windows) + 1]] <- window
+  }
+  return(windows)
+}
+
+# K-mer count function (includes N)
+kmer_count <- function(window, k) {
+  kmer_freq <- list()
+  window_str <- paste(window, collapse = "")
+  for (i in 1:(nchar(window_str) - k + 1)) {
+    kmer <- substr(window_str, i, i + k - 1)
+    kmer_freq[[kmer]] <- kmer_freq[[kmer]] %||% 0L
+    kmer_freq[[kmer]] <- kmer_freq[[kmer]] + 1L
+  }
+  return(kmer_freq)
+}
+
+# Safe null coalescing operator
+`%||%` <- function(a, b) if (!is.null(a)) a else b
+
+# Parameters
+kvalue <- 2
+windows <- sliding_window(chr21[[1]], 10000, 10000)
+
+# Step 1: Count k-mers in each window
+kmer_counts_list <- lapply(windows, function(w) kmer_count(w, k = kvalue))
+
+# Step 2: Get full list of all observed kmers
+all_kmers <- unique(unlist(lapply(kmer_counts_list, names)))
+
+# Step 3: Convert each window's count to a full numeric vector
+kmer_vectors <- lapply(kmer_counts_list, function(counts) {
+  counts_filled <- setNames(rep(0L, length(all_kmers)), all_kmers)
+  counts_filled[names(counts)] <- unlist(counts)
+  return(as.numeric(counts_filled))
+})
+
+# Step 4: Build data frame
+kmer_df <- as.data.frame(do.call(rbind, kmer_vectors))
+colnames(kmer_df) <- all_kmers
+
+# Step 5: Save to CSV
+fwrite(kmer_df, "kmer_counts_per_window.csv")
+
+```

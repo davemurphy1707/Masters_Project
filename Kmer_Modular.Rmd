@@ -1,0 +1,67 @@
+```{r}
+library(seqinr)
+library(data.table)
+
+# Safe null coalescing operator
+`%||%` <- function(a, b) if (!is.null(a)) a else b
+
+# Sliding window function
+sliding_window <- function(sequence, window_size, step_size) {
+  windows <- list()
+  for (i in seq(1, length(sequence) - window_size + 1, by = step_size)) {
+    window <- sequence[i:(i + window_size - 1)]
+    windows[[length(windows) + 1]] <- window
+  }
+  return(windows)
+}
+
+# K-mer counting function
+kmer_count <- function(window, k, exclude_N = FALSE) {
+  kmer_freq <- list()
+  window_str <- paste(window, collapse = "")
+  for (i in 1:(nchar(window_str) - k + 1)) {
+    kmer <- substr(window_str, i, i + k - 1)
+    if (nchar(kmer) == k) {
+      if (!exclude_N || !grepl("n", kmer)) {  # If exclude_N = TRUE, skip k-mers with 'n'
+        kmer_freq[[kmer]] <- kmer_freq[[kmer]] %||% 0L
+        kmer_freq[[kmer]] <- kmer_freq[[kmer]] + 1L
+      }
+    }
+  }
+  return(kmer_freq)
+}
+
+# Main function
+kmer_window_count <- function(fa_file, k, x, exclude_N = FALSE) {
+  fasta_seq <- read.fasta(fa_file, forceDNAtolower = TRUE, strip.desc = TRUE)
+  windows <- sliding_window(fasta_seq[[1]], window_size = x, step_size = x)
+    kmer_counts_list <- lapply(windows, function(w) kmer_count(w, k, exclude_N))
+    all_kmers <- sort(unique(unlist(lapply(kmer_counts_list, names))))
+  
+  # Fill missing k-mers with 0
+  kmer_vectors <- lapply(kmer_counts_list, function(counts) {
+    counts_filled <- setNames(rep(0L, length(all_kmers)), all_kmers)
+    counts_filled[names(counts)] <- unlist(counts)
+    return(as.numeric(counts_filled))
+  })
+  
+  # Build the final data frame
+  kmer_df <- as.data.frame(do.call(rbind, kmer_vectors))
+  colnames(kmer_df) <- all_kmers
+  
+  #
+  output_file <- sprintf("kmer_counts_k%d_win%d.csv", k, x) # each output file is custom the the entries of the fn
+  fwrite(kmer_df, output_file)
+  
+  # Return the filename (invisible)
+  invisible(output_file)
+}
+
+```
+
+
+```{r}
+kmer_window_count("chr21.fa", k = 5, x = 10000)
+```
+
+
