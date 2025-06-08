@@ -1,4 +1,2 @@
 # No-Template
-testing gut setup
-a line from my terminal
-a line from rstudio
+A Repository of Scripts and Data used for my MSc Project
