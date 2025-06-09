@@ -19,8 +19,9 @@ def main():
     X = data.to_numpy()
     
     initial_state_distribution = np.full(n_components, 1/n_components)
+
     
-    model = hmm.MultinomialHMM(n_components, n_iter = 1000,algorithm = "map")
+    model = hmm.MultinomialHMM(n_components, n_iter = 1000,algorithm = "viterbi")
     model.fit(X, lengths = [X.shape[0]])
 
     print("\n--- Calculating Transition Probability Matrix ---")
@@ -48,15 +49,14 @@ def main():
     print(stationary_distribution)
 
     aic = model.aic(X)
-    print("aic")
+    print("\n--- The aic for this model is:")
     print(aic)
     
     bic = model.bic(X)
-    print("bic")
+    print(" \n--- The bic for this model is: ---")
     print(bic)
     
-    #Compute the posterior probability for each state in the model.
-    print("Posterior Probability for each state in the model")
+    print("\nPosterior Probability for each state in the model")
     posterior_probs = model.predict_proba(X)
     print(posterior_probs)
     
@@ -65,7 +65,7 @@ def main():
     print("Iterations:", model.monitor_.iter)
     
     print("Final Log Likelihood:", model.monitor_.history[-1])
-    print("Log Likelihood History:", model.monitor_.history)
+    #print("Log Likelihood History:", model.monitor_.history)
     
     state = model.predict(X)
 
