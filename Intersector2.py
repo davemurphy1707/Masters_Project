@@ -1,5 +1,5 @@
 import pybedtools
-import argparse # module for command line inputs
+import argparse #module for command line inputs
 
 def main():
 	parser = argparse.ArgumentParser(description="Input two bed files and this function quantifies the overlap between states for each bed file. Designed for a masters project.")
