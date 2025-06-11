@@ -1,0 +1,69 @@
+```{r}
+dict1 <- c(
+  state_7 = 30, state_8 = 1109, state_2 = 7806, state_4 = 290,
+  state_17 = 1592, state_10 = 1721, state_12 = 635, state_9 = 50,
+  state_1 = 150, state_13 = 14, state_5 = 129, state_3 = 44,
+  state_15 = 39, state_16 = 96, state_14 = 52, state_6 = 78, state_0 = 80
+)
+
+dict2 <- c(
+  state_7 = 1921, state_8 = 46158, state_2 = 15382, state_14 = 84629,
+  state_15 = 107581, state_10 = 71752, state_1 = 136387, state_5 = 135805,
+  state_17 = 85966, state_6 = 75212, state_4 = 145206, state_3 = 110999,
+  state_12 = 51714, state_0 = 67286, state_16 = 69379, state_11 = 3827,
+  state_13 = 2467, state_9 = 1812
+)
+
+all_states <- sort(unique(c(names(dict1), names(dict2))))
+
+values1 <- setNames(rep(0, length(all_states)), all_states)
+values2 <- values1
+
+values1[names(dict1)] <- dict1
+values2[names(dict2)] <- dict2
+
+barplot(
+  rbind(values1, values2),
+  beside = TRUE,
+  col = c("skyblue", "salmon"),
+  las = 2,
+  main = "State Counts Comparison",
+  ylab = "Count",
+  legend.text = c("Set 1", "Set 2"),
+  args.legend = list(x = "topright", bty = "n")
+)
+
+common_states <- intersect(names(dict1), names(dict2))
+percent_overlap <- (dict1[common_states] / dict2[common_states]) * 100
+print(percent_overlap)
+barplot(
+  percent_overlap,
+  las = 2,
+  col = "mediumseagreen",
+  main = "Percent Overlap for CpG islands and Each State",
+  ylab = "Percentage",
+  ylim = c(0, max(percent_overlap) * 1.1)
+)
+
+```
+
+```{r}
+highest_overlap_percent <-c(3.31859808,
+5.06632105,
+8.50461889,
+14.01163478,
+16.28309864,
+18.99312600,
+18.96904378,
+20.80421127,
+26.49593397,
+25.01564723,
+33.88372188,
+33.64139728,
+51.44779368,
+61.36345301,
+69.27796130,
+50.74762710)
+
+plot(highest_overlap_percent,  ylim = c(0, 100), type = "b")
+```
